@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Predictions</title>
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin: 0;
+        }
+
+        main {
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            flex: 1;
+            min-width: 300px;
+            margin: 10px;
+        }
+
+        h2, h3 {
+            color: #007bff;
+            margin-top: 0;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        ul li {
+            font-size: 1.2em;
+            margin: 15px 0;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .value {
+            font-weight: bold;
+        }
+
+        .positive {
+            color: #28a745;
+        }
+
+        .negative {
+            color: #dc3545;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            font-size: 1.2em;
+            color: #007bff;
+        }
+
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .back-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        footer {
+            margin-top: 30px;
+            padding: 15px 0;
+            background-color: #333;
+            color: white;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .card {
+                min-width: auto;
+            }
+        }
+
+        .refresh-indicator {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        
+        /* Trade section styling */
+        .trade-section {
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        
+        .trade-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .quantity-control {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .quantity-control label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            text-align: left;
+            color: #555;
+        }
+        
+        .quantity-control input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .trade-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .buy-button, .sell-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.2s ease;
+        }
+        
+        .buy-button {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .buy-button:hover {
+            background-color: #218838;
+        }
+        
+        .sell-button {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .sell-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Stock Prediction for <span id="stock">Loading...</span></h1>
+    </header>
+    <main>
+        <div class="loading" id="loading">Loading stock data and generating predictions...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div class="container" id="content" style="display: none;">
+            <div class="card">
+                <h2>Price Predictions</h2>
+                <ul>
+                    <li>Current Price: <span id="current_price" class="value"></span></li>
+                    <li>Next Minute: <span id="next_minute" class="value"></span> <span id="minute_change"></span></li>
+                    <li>Next Hour: <span id="next_hour" class="value"></span> <span id="hour_change"></span></li>
+                    <li>Next Day: <span id="next_day" class="value"></span> <span id="day_change"></span></li>
+                </ul>
+                <p class="refresh-indicator">Data updated as of <span id="update_time"></span></p>
+                
+                <!-- New Trade Section -->
+                <div class="trade-section">
+                    <h3>Trade Options</h3>
+                    <div class="trade-controls">
+                        <div class="quantity-control">
+                            <label for="buy-quantity">Buy Quantity:</label>
+                            <input type="number" id="buy-quantity" min="1" value="100">
+                        </div>
+                        
+                        <div class="quantity-control">
+                            <label for="sell-quantity">Sell Quantity:</label>
+                            <input type="number" id="sell-quantity" min="1" value="100">
+                        </div>
+                    </div>
+                    
+                    <div class="trade-buttons">
+                        <button class="buy-button" onclick="alert('Buy order placed (demo only)')">BUY</button>
+                        <button class="sell-button" onclick="alert('Sell order placed (demo only)')">SELL</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Price Chart</h2>
+                <img id="graph" src="" alt="Stock Prediction Graph">
+            </div>
+        </div>
+        
+        <button class="back-button" onclick="window.location.href='/'">Back to Home</button>
+    </main>
+    
+    <footer>
+        © 2025 Stock Prediction Platform | Built for Financial Professionals
+    </footer>
+
+    <script>
+        // Format date and time for display
+        function formatDateTime(date) {
+            return date.toLocaleString();
+        }
+        
+        // Calculate and format percentage change
+        function calculateChange(predicted, current) {
+            const change = ((predicted - current) / current) * 100;
+            const formattedChange = change.toFixed(2) + '%';
+            const element = document.createElement('span');
+            element.textContent = formattedChange;
+            
+            if (change > 0) {
+                element.classList.add('positive');
+                element.textContent = '▲ ' + formattedChange;
+            } else if (change < 0) {
+                element.classList.add('negative');
+                element.textContent = '▼ ' + formattedChange;
+            }
+            
+            return element.outerHTML;
+        }
+        
+        // Fetch stock data logic
+        const urlParams = new URLSearchParams(window.location.search);
+        const stock = urlParams.get('stock');
+
+        if (!stock) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').innerText = 'Error: No stock selected!';
+        } else {
+            document.getElementById('stock').innerText = stock;
+            
+            // Add timeout to handle API failures
+            const fetchTimeout = setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').innerText = 'Error: Request timed out. The server might be down or experiencing high load.';
+            }, 30000); // 30 seconds timeout
+            
+            fetch(`/get_stock_data?stock=${stock}`)
+                .then(response => {
+                    clearTimeout(fetchTimeout);
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.error || ("HTTP error! Status: " + response.status));
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    if (data.error) {
+                        document.getElementById('error').style.display = 'block';
+                        document.getElementById('error').innerText = data.error;
+                    } else {
+                        // Show content
+                        document.getElementById('content').style.display = 'flex';
+                        
+                        // Update values
+                        const currentPrice = data.last_price;
+                        const minutePrice = data.predictions.next_minute;
+                        const hourPrice = data.predictions.next_hour;
+                        const dayPrice = data.predictions.next_day;
+                        
+                        document.getElementById('current_price').innerText = currentPrice.toFixed(2);
+                        document.getElementById('next_minute').innerText = minutePrice.toFixed(2);
+                        document.getElementById('next_hour').innerText = hourPrice.toFixed(2);
+                        document.getElementById('next_day').innerText = dayPrice.toFixed(2);
+                        
+                        // Calculate and show percentage changes
+                        document.getElementById('minute_change').innerHTML = calculateChange(minutePrice, currentPrice);
+                        document.getElementById('hour_change').innerHTML = calculateChange(hourPrice, currentPrice);
+                        document.getElementById('day_change').innerHTML = calculateChange(dayPrice, currentPrice);
+                        
+                        // Set update time
+                        document.getElementById('update_time').innerText = formatDateTime(new Date());
+                        
+                        // Load graph
+                        const graphImg = document.getElementById('graph');
+                        graphImg.src = data.graph_url;
+                        graphImg.onerror = function() {
+                            graphImg.src = ''; // Clear the src to stop further error attempts
+                            graphImg.alt = 'Error loading graph';
+                            graphImg.style.display = 'none';
+                            const errorMsg = document.createElement('p');
+                            errorMsg.innerText = 'Error loading graph. Please try refreshing the page.';
+                            errorMsg.style.color = '#dc3545';
+                            graphImg.parentNode.appendChild(errorMsg);
+                        };
+                    }
+                })
+                .catch(error => {
+                    clearTimeout(fetchTimeout);
+                    console.error("Error fetching stock data:", error);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').innerText = `Error: ${error.message || 'Unknown error occurred'}`;
+                });
+        }
+    </script>
+</body>
+</html>

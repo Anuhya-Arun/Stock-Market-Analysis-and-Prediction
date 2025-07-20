@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Prediction Platform</title>
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            color: rgb(255, 255, 255);
+            background-color: #1a1a1a; /* Fallback background color */
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body.bg-loaded {
+            background: url('static/images/stock_im.jpg') no-repeat center center/cover;
+        }
+
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for readability */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.15); /* Slightly transparent card */
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #ffffff; /* Accent color */
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        select, button {
+            font-family: inherit;
+            font-size: 1.1em;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 15px 0;
+            width: 80%;
+            max-width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .loading {
+            display: none;
+            margin-top: 15px;
+            color: white;
+            font-style: italic;
+        }
+
+        .error {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="content">
+        <h1>Welcome to StockVision</h1>
+        <p>Select a stock below to view insights and predictions based on recent market data and machine learning analysis.</p>
+        <form id="stockForm">
+            <select id="stockDropdown" required>
+                <option value="" disabled selected>Select a stock</option>
+                <option value="Nestle">Nestle</option>
+                <option value="MarutiSuzuki">Maruti Suzuki</option>
+                <option value="AxisBank">Axis Bank</option>
+            </select>
+            <br>
+            <button type="submit" id="submitBtn">View Predictions</button>
+        </form>
+        <div id="loading" class="loading">Processing request...</div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        // Check if the background image exists and apply it once loaded
+        const bgImage = new Image();
+        bgImage.src = 'static/images/stock_im.jpg';
+        bgImage.onload = function() {
+            document.body.classList.add('bg-loaded');
+        };
+        bgImage.onerror = function() {
+            console.warn('Background image could not be loaded');
+        };
+
+        // Handle form submission
+        document.getElementById('stockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const stock = document.getElementById('stockDropdown').value;
+            if (!stock) {
+                document.getElementById('error').textContent = 'Please select a stock';
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+
+            // Redirect to stock page
+            window.location.href = `stock2.html?stock=${encodeURIComponent(stock)}`;
+        });
+    </script>
+</body>
+</html>
